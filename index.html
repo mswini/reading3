@@ -79,7 +79,15 @@
 				el.innerHTML = '&nbsp;';
 				answer.appendChild(el);
 			}
-			var shuffleSelected = selected.split('').sort(()=>Math.random()-.5)
+			var shuffleSelected = selected.split('').sort(()=>Math.random()-.5);
+			if(shuffleSelected.join('') == selected) {
+				if(shuffleSelected.length==3){
+					shuffleSelected = shuffleSelected[2]+shuffleSelected[0]+shuffleSelected[1];
+				}
+				else {
+					shuffleSelected = shuffleSelected.sort(()=>Math.random()-.5);
+				}
+			}
 			for(i in shuffleSelected){
 				var el = document.createElement('li');
 				el.innerText = el.dataset.letter = shuffleSelected[i];
