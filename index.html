@@ -11,11 +11,12 @@
 		<meta name="viewport" content="minimum-scale=1.0,width=device-width,maximum-scale=1,user-scalable=no" />
 		<style>
 			body {text-align:center;font-family:arial}
-			div {font-size:10vh;margin:3vh auto;cursor:pointer}
+			#pic {font-size:10vh;margin:3vh auto;cursor:pointer}
 			ul {width:80%;margin:8vh auto;font-size:8vh;padding:0;list-style:none;text-transform:uppercase}
 			li {display:inline-block;padding:0vh;min-width:10vh;margin:2vh;text-align:center;border-radius:4px;}
 			#answer li {border:solid 1px grey;background-color:grey;color:lightgrey}
 			#hint li {border:solid 1px black;cursor:pointer}
+			#tip {font-size:22px;visibility:hidden}
 			@media (max-width: 860px) {
 				ul {width:100%;font-size:7vw;margin:4vh auto}
 				li {padding:3vw;min-width:7vw;margin:2.8vw}
@@ -23,37 +24,48 @@
 		</style>
 	</head>
 	<body ontouchstart>
-		<div data-pic='' onclick='speak(selected)'></div>
+		<div id="pic" data-pic='' onclick='speak(selected)'></div>
 		<ul id='answer'></ul>
 		<ul id='hint'></ul>
+		<div id="tip">5</div>
+		<input type="range" min="3" max="9" value="5" onchange="ranging()" />
 	</body>
 	<script>
 		const source = {
-			apple: '&#127822;', bell: '&#128276;',
-			black: '&#11035;',  blue: '&#128998;',
-			book: '&#128213;',  brain: '&#129504;',
-			brown: '&#129003;', bus: '&#128652;',
-			candy: '&#127852;', car: '&#128663;',
-			chair: '&#129681;', clown: '&#129313;',
-			ear: '&#128066;',   eye: '&#128065;',
-			ghost: '&#128123;', green: '&#129001;',
-			key: '&#128273;',   knife: '&#128298;',
-			pizza: '&#127829;', red: '&#128997;',
-			ring: '&#128141;',  star: '&#11088;',
-			shoe: '&#128094;',  tree: '&#127796;',
-			truck: '&#128666;', dog: '&#128021',
-			cat: '&#128008',    tiger: '&#128005',
-			horse: '&#128014',  cow: '&#128004',
-			pig: '&#128022',    camel: '&#128042',
-			bird: '&#128038',   mouse: '&#128001',
-			snake: '&#128013',  ant: '&#128028',
-			whale: '&#128051',  fish: '&#128031',
-			snail: '&#128012'
+			'apple'		: '&#127822;',	'avocado'	: '&#129361;',	'banana'	: '&#127820;',
+			'baloon'	: '&#127880;',	'bell'		: '&#128276;',	'bicycle'	: '&#128690;',
+			'bikini'	: '&#128089;',	'black'		: '&#11035;',	'blue' 		: '&#128998;',
+			'book'		: '&#128213;',	'broccoli' 	: '&#129382;',	'brain'		: '&#129504;',
+			'brown' 	: '&#129003;',	'bus'		: '&#128652;',	'cactus'	: '&#127797;',
+			'camera'	: '&#128247;',	'candle'	: '&#128367;',	'candy' 	: '&#127852;',
+			'car'		: '&#128663;',	'carrot' 	: '&#129365;',	'chair'		: '&#129681;',
+			'cheese' 	: '&#129472;',	'clown'		: '&#129313;',	'cupcake' 	: '&#129473;',
+			'diamond'	: '&#128142;',	'doughnut' 	: '&#127849;',	'ear'		: '&#128066;',
+			'eye'		: '&#128065;',	'ghost'		: '&#128123;',	'grapes' 	: '&#127815;',
+			'green' 	: '&#129001;',	'guitar'	: '&#127928;',	'hamburger'	: '&#127828;',
+			'hammer'	: '&#128296;',	'ice cream'	: '&#127846;',	'key'		: '&#128273;',
+			'knife'		: '&#128298;',	'lollipop' 	: '&#127853;',	'mushroom' 	: '&#127812;',
+			'pencil'	: '&#9999;',	'pineapple'	: '&#127821;',	'pizza' 	: '&#127829;',
+			'popcorn' 	: '&#127871;',	'potato' 	: '&#129364;',	'purple' 	: '&#129002;',
+			'rainbow'	: '&#127752;',	'red' 		: '&#128997;',	'ring'		: '&#128141;',
+			'rocket'	: '&#128640;',	'star' 		: '&#11088;',	'shoe'		: '&#128094;',
+			'snowman'	: '&#9924;',	'tree'		: '&#127796;',	'truck'		: '&#128666;',
+			'tomato' 	: '&#127813;',	'toilet'	: '&#128701;',	'umbrella'	: '&#9730;',
+			'violin'	: '&#127931;',	'yellow' 	: '&#129000;',	'dog'		: '&#128021',
+			'monkey'	: '&#128018',	'cat'		: '&#128008',	'tiger'		: '&#128005',
+			'horse'		: '&#128014',	'cow'		: '&#128004',	'pig'		: '&#128022',
+			'camel'		: '&#128042',	'bird'		: '&#128038',	'crocodile'	: '&#128010',
+			'elephant'	: '&#128024',	'mouse'		: '&#128001',	'rabbit'	: '&#128007',
+			'turtle'	: '&#128034',	'snake'		: '&#128013',	'ant'		: '&#128028',
+			'whale'		: '&#128051',	'dolphin'	: '&#128044',	'fish'		: '&#128031',
+			'octopus'	: '&#128025',	'snail'		: '&#128012'
 		};
 		let shuffled, index = 0, timer, selected, filled = 0;
 		pic = document.getElementsByTagName('div')[0],
 		answer = document.getElementsByTagName('ul')[0],
 		hint = document.getElementsByTagName('ul')[1],
+		range = document.getElementsByTagName('input')[0],
+		tip = document.getElementsByTagName('div')[1],
 
 		speak = (txt) => {
 			var word = new SpeechSynthesisUtterance(txt)
@@ -118,7 +130,21 @@
 				}
 				hint.appendChild(el);
 			}
-		};
-		shuffled = Object.keys(source).sort(()=>Math.random()-.5);
-		start();
+		},
+		ranging = () => {
+			tip.style.visibility = "visible";
+			tip.innerText = range.value;
+			setTimeout(function(){
+				reset();
+			},700);
+		},
+		reset = () => {
+			answer.innerHTML = hint.innerHTML = '';
+			filled = index = 0;
+			shuffled = Object.keys(source).sort(()=>Math.random()-.5);
+			shuffled = shuffled.filter(function(a){return a.length < parseInt(range.value)+1 });
+			tip.style.visibility = "hidden";
+			start();			
+		}
+		reset();
 	</script>
